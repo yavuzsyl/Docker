@@ -1,0 +1,102 @@
+﻿###### DOCKER INTRO ###########
+##https://gokhansengun.com/docker-nedir-nasil-calisir-nerede-kullanilir/ docker giriş için okunmalı
+DOCKER
+Dockerfile environment config
+image dockerfile a göre oluşur
+image readonlydir -gerekli environmentların ve dependencylerin sağlandığı publish edilmiş çalışmaya hazır uygulamayı barındırır
+
+Container ile imageler çalışabilir hale gelir.
+Container -- image üzerinden uygulamayı ayağa kaldırır 1 image ile 1 den fazla container çalıştırılabilir.
+image i taslak olarak düşünebiliriz containerlarda bu image in çalışan instancelarıdır.
+-------------------
+image dockerfile daki layer adedi kadar layerdan oluşur.
+-----------------------
+container ayağa kaldırıldığı zaman w/r bir katman oluşur bu katman üzerinde uygulama çalışırken gerçekleşen değişiklikler kaydedilir container silinirse bu değişikliklerde kaybolur
+bu önlenebilir data-volume?
+----------------------------
+docker CLI
+--2 tool
+docker cli client side--one of clients
+docker daemon server side
+--cli tarafından girilen komut ile docker daemon a istek atılır ve istenilen aksiyon gerçekleştirilir.
+------------------------------
+Docker Registry (image store)
+image ile çalışan container işletim sistemi uygulama iin gerekli environment dotnet.sdk ver diğer kütüphaneleri barındırır.
+---------------------------------
+var olan imageler üzerine kendi uygulamamızın konfigürasyonlarını yaparak yeni image oluşturup bunu container ile ayağa kaldırıp çalıştırabiliriz.-- örnek asp.net core sdk image'i üzerinde.
+-------------------------------
+
+########### DOCKERFILE #################
+
+1.uygulamayı linux contianerda çalıştıracağız bunun için image lazım microsoftun asp.net core imageını almak yeterli olacaktır çünkü bu image içinde zaten gerekli işletim sistemi mevcut ve bu işletim sisteminde asp.net core runtime frameworkü yüklü olarak hazırlanmış
+2.uygulamayı çalıştırabilmek için asp.net core frameworku lazım =>
+ dockerize edeceğimiz uygulama release modda olduğu için bu uygulamayı çalıştırmak için asp.net core runtime yeterli olacaktır - sdk yüklemeye gerek yok
+
+3.docker-hub dan .net core runtime image
+--docker pull mcr.microsoft.com/dotnet/core/runtime:3.1 ile image çekilir burada "runtime:3.1" ile image-registry deki "mcr.microsoft.com/dotnet/core/runtime" bu image in "3.1" versiyonlu olanı çekeceğimizi tag ile belirtiriz versiyon verilmezse bu image'e ait en son versiyonu ":latest" tagı ile çekilir.
+
+Docker File yazımı =>
+docker file katmanlardan oluşur ve yazacağımız bu file ile imageımızı oluşturmuş olacağız
+Base image: 1. katman
+#FROM mcr.microsoft.com/dotnet/core/runtime-- burada from dan sonra belirtilen image üzerinde çalışacağımız yani bizim imageımızı bu image üzerine yazacağımızı belirtiyoruz.
+bu image içinde gerekli işletim sistemi mevcut ve bu işletim sisteminde asp.net core runtime frameworkü yüklü olarak hazırlanmış
+
+2.katman
+#WORKDIR /app -- image içinde bir app klasörü oluşturur ve burada çalışacağımız belirtiriz
+
+3.katamn
+#COPY bin/Release/netcoreapp3.1/publish /app/
+--info(burada docker file uygulamanın root klasöründe olduğu için gidecğimiz klasörlerle aynı seviyede ve buna göre klasör pathleri yazılacak)
+--yapılacak iş git uygulamayı belirtilen pathden(bin/Release/netcoreapp3.1/publish) al ve image içindeki klasöre(app) kopyala
+"bin/Release/netcoreapp3.1/publish" burada publish edilmiş uygulama assemblyimiz build edildikten sonra oluşan dll ve exe yapısıyla mevcut bize burada dll lazım çünkü başka bir uygulama içinde çalıştırılacaksa dll(dynamic link library) halinde impelente edilmesi lazım.
+
+4.katman
+ENTRYPOINT ["dotnet","DockerConsole.dll"]-- imagedan bir container ayağa kalktığı zaman çalışacak kodu belirtiyoruz giriş noktası imagedaki app klasöründe çalıştığımız için buradaki DockerConsole.dll i dotnet komutu ile çalıştıracağız
+
+docker file ile image oluşturuldu
+
+################ DOCKER IMAGE ######################################
+
+- docker build -t dockerconsoleapp:v1(:v1 ile image versiyonu verebiliriz) . -- "." ile dockerfile ın bulunduğumuz dizinde olduğunu belirtip bu dockerfileden dockerconsoleapp adında bir image oluşturuyoruz
+- docker images ile local registrydeki imagelarımızı görebiliriz 
+
+############# DOCKER CONTAINER ######################################
+### CLI ###
+  RUN
+--docker run dockerconsoleapp:v1  ile direk olarak iamge ile container oluşturulur ve çalışır (create + start)
+--docker run --name consoleapp_container3 dockerconsoleapp:v1 
+--docker run --rm --name consoleapp_container3 dockerconsoleapp:v1 #image dan container ayağa kaldır çalışma bitince containerı sil / container stop edilirsede silinir
+
+--docker create --name container_name image_name # ile isim verilerek containerda oluşturulabilir
+--docker ps  # çalışan containerlar 
+--docker ps -a  # mevcut containerlar
+--docker start -a dockerconsoleapp_container # containerı çalıştır -a eklenirse uygulama çıktısı consoleda görünür 
+--docker stop dockerconsoleapp_container # container ı durdur
+--docker rm dockerconsoleapp_container # containerı sil
+--docker rmi dockerconsoleapp:v1 # image sil
+
+--image ve container isimlerinin kullanıldığı yerlerde image id ve container id verilerek de komutlar çalıştırılabilir id lerin ilk 3 karakterini yazmak yeterli olacaktır
+--image a bağlı çalışan container varsa "-force" ile silinemez image, containerlar durmuş halde ise "-force" ile image silinebilir
+docker rmi dockerconsole:v1 --force 
+--image a bağlı container yoksa docker rmi name/id ile direkt olarak silinebilir
+
+--container ayakta ise container -force edilerek silinir
+ docker rm name --force     
+--container çalışmıyorsa docker rm name/id ile direkt silinebilir
+
+--docker pull mcr.microsoft.com/dotnet/core/sdk:3.1
+--dockerhub da image repository açıp imageın farklı versiyonlarını burada tutabiliriz
+docker tag local-image:tagname new-repo:tagname # local repodaki(registry) imageı referans alıp göndereceğimiz repository adına uygun bir image olusturuyoruz 
+docker push new-repo:tagname
+
+docker tag holadocker yavsyl/holadockeramigo:v1
+docker push yavsyl/holadockeramigo:v1
+
+--docker login ile cli dan login olunabilir dockerhub a
+
+#https://docs.docker.com/engine/reference/commandline/cli/ docker cli commands
+
+-----------------------------------
+########## PORT ######################
+docker run -p 5000:80 mvcimage:v1 #bizim os-windowsdaki 5000 portunu çalışan docker containerın linux-os in 80 portuna yönlendiriyoruz
+docker run -d -p 5001:80 --name mvcontainer mvcimage:v1 -- '-d' ile detach olarak container ayağa kaldırılır console ekranında container çıktısını görmeyiz
