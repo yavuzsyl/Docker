@@ -1,8 +1,11 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1
+﻿FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as build
 WORKDIR /app
-COPY . .
+COPY *.csproj .
 RUN dotnet restore
+COPY . .
 RUN dotnet publish DockerMvc.csproj -c Release -o out
-WORKDIR out
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+WORKDIR /app
+COPY --from=build /app/out .
 ENV ASPNETCORE_URLS="http://*:4500"
 ENTRYPOINT ["dotnet","DockerMvc.dll"]
