@@ -162,3 +162,7 @@ ENTRYPOINT ["dotnet","DockerMvc.dll"]
 #################################################
 1.imageda sdk imageı üzerinde uygulamayı restore edip publish ediyoruz
 2.imageda 1.imagedaki publish edilmiş uygulamayı alıp runtime imageında çalıştırıyoruz dockerfiledan image oluşturulup container ayağa kalkınca 2.imagemız çalışacak
+
+#### DOCKER IGNORE ############
+image içine atılmasını istenmeyen dosyaları yoksayar 
+örnek proejinin publish edilmiş halini kullandığımız için bin ve obj klasörlerine ihtiyaç yok bunları image içine atmamıza gerek yok 
