@@ -100,3 +100,24 @@ docker push yavsyl/holadockeramigo:v1
 ########## PORT ######################
 docker run -p 5000:80 mvcimage:v1 #bizim os-windowsdaki 5000 portunu çalışan docker containerın linux-os in 80 portuna yönlendiriyoruz
 docker run -d -p 5001:80 --name mvcontainer mvcimage:v1 -- '-d' ile detach olarak container ayağa kaldırılır console ekranında container çıktısını görmeyiz
+
+########### CORE CLI ##############
+https://docs.microsoft.com/tr-tr/dotnet/core/tools/
+
+docker file içinde dotnet komutlarının çalıştırılması 
+1. gereksinim => dotnet komutlarının çalışması için docker cli gerekli docker cli da dotnet core un sdk imageının içinde mevcut.
+https://hub.docker.com/_/microsoft-dotnet-core-sdk/
+2.örnek file içinde projeyi publish etme komutu çalıştırılarak daha önceden projeyi manuel publish etmeye gerek kalmayacak
+
+from=> sdk  # image ı ile değiştirilir imageımızı sdk imageı üzerine kuruyoruz
+WORKDIR /app # image içinde app klasöründe çalışacağımızı belirtiyoruz burada app yoksa yeniden oluşturulur
+COPY . . # ilk "." ile dockerfile ın buldunuğu dizini ifade eder ikinci nokta "." ile ilk noktada belirtilen tüm dosyalar kopyalanacak imageımızın içindeki /app klasörü altına
+mantık ilkini al ikinciye kopyala
+RUN dotnet restore # ile projemizdeki packageleri restore eder yeniler-yeniden yükler-sikinti varsa yeniler
+RUN dotnet publish DockerMvc.csproj -c Release -o out # bulunulan dizinde DockerMvc.csproj u /app klasörü içindeki out klasörü altına publish edeceke release modda  /out denilirse /app klasöründen çıkar dışarda out klasörü oluşturur
+WORKDIR out --publish edilmiş uygulama out içinde oludğundan çalışma directoryimiz /app/out olacak 
+ENV ASPNETCORE_URLS="http://*:4500" defaultta dotnet core sdkyi içinde uygulamanın çalışacağı ortam localhost olarak verilmiş ama oluşturduğumuz imageın localhostta çalışmasını istemiyoruz
+"*" ile hangi ip de çalışacaksa çalışsın container içinde 4500 portunda çalışacağını belirtiyoruz
+ENTRYPOINT ["dotnet","DockerMvc.dll"] uygulamayı ayağa kaldır
+
+
