@@ -178,3 +178,12 @@ tmpfs mount => os üzerinde memorye kaydedilir veriler
 #####
 docker build --no-cache  -t holadocker:v4 . ## --no-cache ile imageı dockerfiledan oluştururken image layerlarını cacheden almadan tekrardan oluşturur
 #####
+
+########## Bind-Mount #########
+containerlarda yapılan veri değişiklikleri os açılan bir klasör üzerinden okuma ve yazma işlemleri gerçekleştirilecek
+bunun için ilk olarak dockera settingsden klasöre erişebilmesi için izin verilmesi gerekiyor
+
+docker run -d -p 5000:4500 --name holacon1 --mount type=bind,source="C:\Users\yavuz\Desktop\pics",target="/app/wwwroot/images" holadocker:v4
+--source containerin os de hangi dizin ile bind edileceği belirtilir
+--target containerdaki uygulama içinde hangi dizin ile bind edileceği
+container ayapa kaldırılırken bind işlemi gerçekleştirilmiş oldu
