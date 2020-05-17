@@ -174,3 +174,7 @@ volume => veriler docker içinde dosya sistemi oluşturularak buraya kaydedilir 
 bind-mount a göre daha kolay ve pratiktir docker cli ile yönetilebilidiği için
 volume leri cloud tarafında farklı serverlarda da tutmak mümkün bind-mountta böyle birşey mümkün değil
 tmpfs mount => os üzerinde memorye kaydedilir veriler
+
+#####
+docker build --no-cache  -t holadocker:v4 . ## --no-cache ile imageı dockerfiledan oluştururken image layerlarını cacheden almadan tekrardan oluşturur
+#####
