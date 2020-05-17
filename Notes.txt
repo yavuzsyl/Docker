@@ -166,3 +166,11 @@ ENTRYPOINT ["dotnet","DockerMvc.dll"]
 #### DOCKER IGNORE ############
 image içine atılmasını istenmeyen dosyaları yoksayar 
 örnek proejinin publish edilmiş halini kullandığımız için bin ve obj klasörlerine ihtiyaç yok bunları image içine atmamıza gerek yok 
+
+## DOCKER VOLUME ####
+Docker containerlar tarafından üretilen dataların kalıcı olmasını sağlar
+bind mount => containerlarda kaydedilen verilerin containerın çalıştırıldığı hostta ki os içine kaydedilmei, tüm containerlar buradaki verileri ortak kullanabilirler okuma ve yazma
+volume => veriler docker içinde dosya sistemi oluşturularak buraya kaydedilir docker cli üzerinden,
+bind-mount a göre daha kolay ve pratiktir docker cli ile yönetilebilidiği için
+volume leri cloud tarafında farklı serverlarda da tutmak mümkün bind-mountta böyle birşey mümkün değil
+tmpfs mount => os üzerinde memorye kaydedilir veriler
