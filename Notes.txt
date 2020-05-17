@@ -187,3 +187,13 @@ docker run -d -p 5000:4500 --name holacon1 --mount type=bind,source="C:\Users\ya
 --source containerin os de hangi dizin ile bind edileceği belirtilir
 --target containerdaki uygulama içinde hangi dizin ile bind edileceği
 container ayapa kaldırılırken bind işlemi gerçekleştirilmiş oldu
+
+
+#### VOLUME ####
+farklı serverlarda volumeler oluşturularak verileri kaydedebiliriz
+volumeler docker üzerinde oluşturulur docker cli ile yönetilebilmesinden ve farklı ortamlarda volume oluşturma gibi özelliklerinden dolayı -
+volumeler bind-mount a göre daha avantajlıdırlar
+-docker volume create images --images adında bir volum oluşturulur
+
+docker run -d -p 5000:4500 --name holacon1 -v images:/app/wwwroot/images holadocker:v4  container içindeki images klasörü ile oluşturduğumuz images volume ü bind ediyoruz.
+-container ayağa kalkarken uygulamada target dizin altındaki verileri direkt olarak volume içine kopyalar
