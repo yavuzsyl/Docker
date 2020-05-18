@@ -9,6 +9,7 @@ using DockerMvc.Models;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Configuration;
 
 namespace DockerMvc.Controllers
 {
@@ -16,11 +17,13 @@ namespace DockerMvc.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IFileProvider fileProvider;
+        private readonly IConfiguration configuration;
 
-        public HomeController(ILogger<HomeController> logger, IFileProvider fileProvider)
+        public HomeController(IConfiguration configuration, ILogger<HomeController> logger, IFileProvider fileProvider)
         {
             _logger = logger;
             this.fileProvider = fileProvider;
+            this.configuration = configuration;
         }
 
         public IActionResult ImageSave()
@@ -46,6 +49,7 @@ namespace DockerMvc.Controllers
 
         public IActionResult ShowImages()
         {
+            ViewBag.ConnectionString = configuration.GetSection("MySQL").Value;
             var files = fileProvider.GetDirectoryContents("wwwroot/images").ToList().Select(x=> x.Name);
             return View(files);
         }

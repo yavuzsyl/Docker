@@ -1,6 +1,22 @@
 ﻿@model IEnumerable<string>
 
 <h2>Pictures</h2>
+
+<div>
+    <em>@ViewBag.ConnectionString</em> 
+</div>
+<div>
+    <environment names="Development">
+        <h2>Env:Dev</h2>
+    </environment>
+    <environment names="Staging">
+        <h2>Env:Prod</h2>
+    </environment>
+    <environment names="Production">
+        <h2>Env:Prod</h2>
+    </environment>
+</div>
+
 <div class="container">
     <div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">

@@ -135,7 +135,7 @@ COPY --from=build /app/out . ---uygulamayı publish ettiğimiz alias olarak buil
 .
 WORKDIR out demeye gerek yok artık yeni image da /app altında çalışacak
 
-#PROEJDE DEĞİŞİKLİK 
+################ PROEJDE DEĞİŞİKLİK #################
 #######
 COPY *.csproj .
 RUN dotnet restore
@@ -167,7 +167,10 @@ ENTRYPOINT ["dotnet","DockerMvc.dll"]
 image içine atılmasını istenmeyen dosyaları yoksayar 
 örnek proejinin publish edilmiş halini kullandığımız için bin ve obj klasörlerine ihtiyaç yok bunları image içine atmamıza gerek yok 
 
+######################
 ## DOCKER VOLUME ####
+####################
+
 Docker containerlar tarafından üretilen dataların kalıcı olmasını sağlar
 bind mount => containerlarda kaydedilen verilerin containerın çalıştırıldığı hostta ki os içine kaydedilmei, tüm containerlar buradaki verileri ortak kullanabilirler okuma ve yazma
 volume => veriler docker içinde dosya sistemi oluşturularak buraya kaydedilir docker cli üzerinden,
@@ -191,9 +194,40 @@ container ayapa kaldırılırken bind işlemi gerçekleştirilmiş oldu
 
 #### VOLUME ####
 farklı serverlarda volumeler oluşturularak verileri kaydedebiliriz
-volumeler docker üzerinde oluşturulur docker cli ile yönetilebilmesinden ve farklı ortamlarda volume oluşturma gibi özelliklerinden dolayı -
-volumeler bind-mount a göre daha avantajlıdırlar
--docker volume create images --images adında bir volum oluşturulur
+volumele docker üzerinde oluşturulur docker cli ile yönetilebilmesinden ve farklı ortamlarda volume oluşturma gibi özelliklerinden dolayı -
+volume bind-mount a göre daha avantajlıdır
+-docker volume create images --images adında bir volume oluşturulur
 
 docker run -d -p 5000:4500 --name holacon1 -v images:/app/wwwroot/images holadocker:v4  container içindeki images klasörü ile oluşturduğumuz images volume ü bind ediyoruz.
 -container ayağa kalkarken uygulamada target dizin altındaki verileri direkt olarak volume içine kopyalar
+
+####################################################
+### CONTAINER için environment belirleme ###########
+###################################################
+
+development-staging-production
+-dev ortamda çalışan container içindeki uygulamayı geliştirme sürecinde daha detaylı gözlemleyebilmek için container içindeki uygulamanın ortamı development olarak belirlenebilir
+-veya productionda çalışan uygulamada oluşan hataları detaylı incelemek için development ortamda çalıştırılarak gözlemlenebilir
+
+docker run -p 5000:4500 --env ASPNETCORE_ENVIRONMENT=STAGING --name holacon1 holadocker:v5   -- environment belirleeme env değişken setlenir
+
+### <none> image ????  #####
+cacheleme için oluşturulur docker tarafından
+docker images -f "dangling=true" none imageları getirir
+docker rmi $(docker images -f "dangling=true" -q) -- "-q" ile imageların id leri alınır
+
+
+uygulamaya ait credentials env değişkende tutulup container ayağa kaldırılırken credentials belirlenebilir
+
+docker run -p 5001:4500 --env MySQL='Server=localhost;userid=root;password=9585200;database=Development;' --name holacon2 holadocker:v7  
+imagedan container oluşturulurken uygulamada bulunan env ve config dosyaları içindeki değişkenlerin değer ataması yapılabilir ör connection string
+
+art arda --env veya -e ile birden fazla environment variable yazılabilir
+docker run -p 5001:4500 --env ASPNETCORE_ENVIRONMENT=DEVELOPMENT --env MySQL='Server=localhost;userid=root;password=9585200;database=Production;' --name holacon2 holadocker:v7  
+
+buradan yazılan environment değişkenler appsettings içindeki değerleri ezer
+
+###dockerfile içinde environment yazılması #####
+dockerfile içinde de istenildiği kadar environment variable yazılabilir
+#ENV MySQL =  "Server=localhost;userid=root;password=9585200;database=Development;"
+ENV ASPNETCORE_ENVIRONMENT="DEVELOPMENT"
