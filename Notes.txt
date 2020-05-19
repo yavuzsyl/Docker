@@ -231,3 +231,38 @@ buradan yazılan environment değişkenler appsettings içindeki değerleri ezer
 dockerfile içinde de istenildiği kadar environment variable yazılabilir
 #ENV MySQL =  "Server=localhost;userid=root;password=9585200;database=Development;"
 ENV ASPNETCORE_ENVIRONMENT="DEVELOPMENT"
+
+
+#### sql container #### ?
+sql server için ayrı bir container oluşturup bilgileri uygulama içinde verilmelidir.
+
+
+### dockerizing n layerd project  ########
+
+example dockerfile => 
+
+1.db local kullanılacaksa sql container kullanılmalı
+2. local değilse başka bir sunucudaki db connection verilebilir ör :
+ben azure db kullandım
+  "DefaultConnection":"Server=tcp:yapi.database.windows.net,1433;Initial Catalog=yapidb;Persist Security Info=False;User ID=yavuz;Password=xxxxxxxx;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" 
+
+dockerfile içinde proje içindeki katmanlar assemblyler ayrı ayrı kopyalanır sadece değişiklik olan assembly yi tekrar getirmesi için bu durumda diğerlerini cache den çekecek docker container oluştururken
+
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as build
+WORKDIR /app
+COPY ./Yapi.Contracts/*.csproj ./Yapi.Contracts/
+COPY ./YAPI.IntegrationTest/*.csproj ./YAPI.IntegrationTest/
+COPY ./Yapi.Sdk/*.csproj ./Yapi.Sdk/
+COPY ./Yapi.Sdk.Sample/*.csproj ./Yapi.Sdk.Sample/
+COPY ./Yapi.Web/*.csproj ./Yapi.Web/
+COPY ./YAPI/*.csproj ./YAPI/
+COPY *.sln .
+RUN dotnet restore
+COPY . .
+RUN dotnet publish ./YAPI/*.csproj -o /publish/
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+WORKDIR /app
+COPY --from=build /publish .
+ENV ASPNETCORE_URLS="http://*:5000"
+ENTRYPOINT [ "dotnet","YAPI.dll" ]
+
